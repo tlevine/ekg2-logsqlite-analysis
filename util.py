@@ -73,6 +73,7 @@ def avail_within(db, start=0, end=2**32):
 
 if __name__ == '__main__':
     import datetime
+    from unidecode import unidecode
     import cli
 
     DBFILE = cli.get_db_name()
@@ -83,14 +84,8 @@ if __name__ == '__main__':
     for uid, seconds in avail.items():
         avail[uid] = datetime.timedelta(seconds=seconds)
 
-
-    avail_by_nick={}
-
-    # Nicknames
-    for person in dt.execute('SELECT DISTINCT uid, nick FROM log_status;'):
-        pretty_key = person['nick'] + '(' + person['uid'] + ')'
-        avail_by_nick[pretty_key] = avail_by_uid[person['uid']]
-
     # Pretty printing
-    for nick, delta in avail_by_nick.items():
-        print nick + '\t' + str(delta)
+    print('Person\tTime online (HH:MM:SS)')
+    for uid, delta in avail.items():
+        nick = dt.execute('SELECT nick FROM log_status WHERE uid = ?', [uid])[0]['nick']
+        print(unidecode(nick) + u'\t' + unicode(delta))
